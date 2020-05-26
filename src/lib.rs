@@ -1,5 +1,6 @@
 use core::future::Future;
 use futures::{Sink, Stream, TryFuture, TryStream};
+use std::net::SocketAddr;
 
 pub use url::Url;
 
@@ -26,6 +27,21 @@ pub trait SocketProvider {
     type Connect: Future + TryFuture<Ok = Self::Socket>;
 
     fn connect(&self, url: Url) -> Self::Connect;
+}
+
+pub trait ServerProvider {
+    type Listen: Stream + TryStream<Ok = Self::Socket>;
+    type Socket: Socket;
+
+    fn listen(&self, addr: SocketAddr) -> Self::Listen;
+}
+
+pub trait ServerProviderExt: ServerProvider {
+    type ListenError;
+}
+
+impl<T: ServerProvider> ServerProviderExt for T {
+    type ListenError = <Self::Listen as TryStream>::Error;
 }
 
 pub trait SocketProviderExt: SocketProvider {
