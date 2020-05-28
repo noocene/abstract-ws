@@ -4,14 +4,16 @@ use std::net::SocketAddr;
 
 pub use url::Url;
 
-pub trait Socket: Stream<Item = Vec<u8>> + Sink<Vec<u8>> {}
+pub trait Socket: Stream + TryStream<Ok = Vec<u8>> + Sink<Vec<u8>> {}
 
 pub trait SocketExt: Socket {
-    type Error;
+    type StreamError;
+    type SinkError;
 }
 
 impl<T: Socket> SocketExt for T {
-    type Error = <Self as Sink<Vec<u8>>>::Error;
+    type StreamError = <Self as TryStream>::Error;
+    type SinkError = <Self as Sink<Vec<u8>>>::Error;
 }
 
 pub trait SocketProvider {
