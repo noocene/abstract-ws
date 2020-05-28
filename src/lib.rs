@@ -4,20 +4,14 @@ use std::net::SocketAddr;
 
 pub use url::Url;
 
-pub trait Socket: Stream + Stream<Item = Vec<u8>> + Sink<Vec<u8>> {
-    type Close: TryFuture<Ok = ()>;
-
-    fn close(self) -> Self::Close;
-}
+pub trait Socket: Stream<Item = Vec<u8>> + Sink<Vec<u8>> {}
 
 pub trait SocketExt: Socket {
-    type SendError;
-    type CloseError;
+    type Error;
 }
 
 impl<T: Socket> SocketExt for T {
-    type SendError = <Self as Sink<Vec<u8>>>::Error;
-    type CloseError = <Self::Close as TryFuture>::Error;
+    type Error = <Self as Sink<Vec<u8>>>::Error;
 }
 
 pub trait SocketProvider {
